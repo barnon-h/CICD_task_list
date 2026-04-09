@@ -6,8 +6,10 @@ def client():
     app = create_app( { "DATABASE" : ":memory:", "TESTING" : True })
     
     with app.app_context():
-        from app.model import init_db
-        init_db( app )
+        from app.model import get_db
+        db = get_db( app )
+        with app.open_resource( "schema.sql" ) as f:
+            db.executescript( f.read().decode( "utf8" ) )
     
     with app.test_client() as client:
         yield client
