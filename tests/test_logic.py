@@ -4,6 +4,11 @@ from app import create_app
 @pytest.fixture
 def client():
     app = create_app( { "DATABASE" : ":memory:", "TESTING" : True })
+    
+    with app.app_context():
+        from app.model import init_db
+        init_db( app )
+    
     with app.test_client() as client:
         yield client
 
