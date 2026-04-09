@@ -67,7 +67,7 @@ def get_task( task_id ):
         return jsonify( { "error" : "Task not found" } ), NOT_FOUND
 
 # Update task
-@logic_bp.route("/tasks/<int:task_id>", methods = ["PATCH"])
+@logic_bp.route("/tasks/<int:task_id>", methods = ["PUT", "GET", "DELETE"])
 def update_task( task_id ):
     data = request.get_json()
 
