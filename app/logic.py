@@ -8,6 +8,7 @@ SUCCESS = 200
 CREATED = 201
 ERROR = 400
 NOT_FOUND = 404
+NO_CONTENT = 204
 
 def to_dict( row ):
     return {
@@ -41,7 +42,6 @@ def create_tasks():
     db.commit()
 
     row = db.execute("SELECT * FROM tasks WHERE id = ?", (cursor.lastrowid, )).fetchone()
-    db.close()
 
     return jsonify( to_dict( row ) ), CREATED
 
@@ -51,7 +51,6 @@ def get_tasks():
     db = get_db( current_app )
     rows = db.execute( "SELECT * FROM tasks ORDER BY created_at DESC" ).fetchall()
 
-    db.close()
     return jsonify( [ to_dict( row ) for row in rows ] ), SUCCESS
 
 # Get single task
@@ -59,7 +58,6 @@ def get_tasks():
 def get_task( task_id ):
     db = get_db( current_app )
     row = db.execute( "SELECT * FROM tasks WHERE id = ?", ( task_id, ) ).fetchone()
-    db.close()
 
     if row:
         return jsonify( to_dict( row ) ), SUCCESS
@@ -67,7 +65,7 @@ def get_task( task_id ):
         return jsonify( { "error" : "Task not found" } ), NOT_FOUND
 
 # Update task
-@logic_bp.route("/tasks/<int:task_id>", methods = ["PUT", "GET", "DELETE"])
+@logic_bp.route("/tasks/<int:task_id>", methods = ["PUT", "GET"])
 def update_task( task_id ):
     data = request.get_json()
 
@@ -95,7 +93,6 @@ def update_task( task_id ):
     )
     db.commit()
     row = db.execute( "SELECT * FROM tasks WHERE id = ?", ( task_id, ) ).fetchone()
-    db.close()
 
     return jsonify( to_dict( row ) ), SUCCESS
 
@@ -111,6 +108,5 @@ def delete_task( task_id ):
 
     db.execute( "DELETE FROM tasks WHERE id = ?", ( task_id, ) )
     db.commit()
-    db.close()
 
-    return jsonify( { "message" : "Task deleted successfully" } ), SUCCESS
+    return jsonify( { "message" : "Task deleted successfully" } ), NO_CONTENT

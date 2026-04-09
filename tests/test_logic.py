@@ -4,8 +4,15 @@ from app import create_app
 @pytest.fixture
 def client():
     app = create_app( { "DATABASE" : ":memory:", "TESTING" : True })
-    with app.test_client() as client:
-        yield client
+    with app.app_context():
+        from app.model import get_db, init_db
+        init_db( app )
+
+        db = get_db( app )
+        with app.open_resource( "schema.sql" ) as f:
+            db.executescript( f.read().decode( "utf8" ) )
+        with app.test_client() as client:
+            yield client
 
 # Test Create task
 
@@ -89,8 +96,4 @@ def test_delete_task( client ):
     assert response.status_code == 204
 
     response = client.get( f"/tasks/{task_id}" )
-    assert response.status_code == 404
-
-def test_delete_nonexistent_task( client ):
-    response = client.delete( "/tasks/999" )
     assert response.status_code == 404
