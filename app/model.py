@@ -1,9 +1,11 @@
 import sqlite3
+from flask import g
 
 def get_db( app ):
-    db = sqlite3.connect( app.config[ "DATABASE" ] )
-    db.row_factory = sqlite3.Row
-    return db
+    if "db" not in g:
+        g.db = sqlite3.connect( app.config[ "DATABASE" ] )
+        g.db.row_factory = sqlite3.Row
+    return g.db
 
 # simple sqlite3 db (id = int, title = text, description = text, completed = boolean, created_at = time)
 def init_db( app ):
